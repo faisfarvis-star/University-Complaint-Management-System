@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Audit Logs{% endblock %}
+{% block content %}
+<div class="card-n"><div class="table-responsive"><table class="table"><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Entity</th></tr></thead><tbody>
+{% for l in logs %}<tr><td>{{ l.created_at|dt }}</td><td>{{ l.actor.full_name if l.actor else 'system' }}</td><td>{{ l.action }}</td><td>{{ l.entity_type }}{% if l.entity_id %} #{{ l.entity_id }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="text-center text-muted py-4">No audit entries yet.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

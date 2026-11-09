@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import stat %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><p class="mb-0 text-muted">Welcome back, {{ current_user.full_name.split()[0] }}.</p>
+<a class="btn btn-primary" href="{{ url_for('student.submit') }}"><i class="bi bi-plus-lg"></i> Submit complaint</a></div>
+<div class="row g-3 mb-4">
+ <div class="col-6 col-xl-3">{{ stat('Total submitted', stats.total, 'collection') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Pending', stats.pending, 'hourglass-split', 'warning') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('In progress', stats.in_progress, 'gear', 'info') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Resolved / closed', stats.resolved + stats.closed, 'check-circle', 'success') }}</div>
+</div>
+<div class="card-n"><h2>Recent complaint activity</h2>{% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div>
+{% endblock %}

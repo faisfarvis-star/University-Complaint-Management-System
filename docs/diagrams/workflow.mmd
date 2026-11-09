@@ -1,0 +1,11 @@
+stateDiagram-v2
+    [*] --> Pending: Student submits
+    Pending --> Assigned: Admin assigns staff
+    Assigned --> Assigned: Admin reassigns
+    Assigned --> InProgress: Staff starts work
+    InProgress --> Resolved: Staff resolves (note required)
+    Resolved --> Closed: Admin verifies
+    Resolved --> Reopened: Student/Admin (reason required)
+    Closed --> Reopened: Admin (reason required)
+    Reopened --> Assigned: Admin reassigns
+    Reopened --> InProgress: Staff resumes

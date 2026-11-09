@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import field, csrf %}
+{% block title %}Complaint Categories{% endblock %}
+{% block content %}
+<div class="row g-3"><div class="col-lg-4"><div class="card-n"><h2>Add category</h2><form method="post" novalidate>{{ form.hidden_tag() }}{{ field(form.name) }}{{ field(form.description) }}<button class="btn btn-primary" type="submit">Add</button></form></div></div>
+<div class="col-lg-8"><div class="card-n"><div class="table-responsive"><table class="table"><thead><tr><th>Name</th><th>Description</th><th>Complaints</th><th></th></tr></thead><tbody>
+{% for c, n in rows %}<tr><td>{{ c.name }}</td><td>{{ c.description }}</td><td>{{ n }}</td><td class="text-nowrap">
+<a class="btn btn-soft btn-sm" href="{{ url_for('admin.edit_category', category_id=c.id) }}">Edit</a>
+<form method="post" action="{{ url_for('admin.delete_category', category_id=c.id) }}" class="d-inline">{{ csrf() }}<button class="btn btn-soft btn-sm text-danger" data-confirm="Delete {{ c.name }}?">Delete</button></form></td></tr>{% endfor %}
+</tbody></table></div></div></div></div>
+{% endblock %}

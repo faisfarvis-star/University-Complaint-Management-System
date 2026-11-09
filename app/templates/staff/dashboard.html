@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import stat %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+ <div class="col-6 col-xl-3">{{ stat('Assigned complaints', stats.assigned, 'inbox') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Active', stats.active, 'gear', 'info') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Pending tasks (not started)', stats.to_start, 'hourglass-split', 'warning') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Resolved', stats.resolved_total, 'check-circle', 'success') }}</div>
+</div>
+<div class="row g-3"><div class="col-lg-8"><div class="card-n"><h2>Recent assignments</h2>{% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div></div>
+<div class="col-lg-4"><div class="card-n"><h2>My performance</h2>
+ <p class="mb-1">Resolution rate</p><div class="progress mb-3" role="progressbar" aria-label="Resolution rate" aria-valuenow="{{ stats.rate }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ stats.rate }}%">{{ stats.rate }}%</div></div>
+ <p class="mb-0">Average resolution time: <strong>{{ (stats.avg_hours ~ ' hours') if stats.avg_hours is not none else 'n/a' }}</strong></p></div></div></div>
+{% endblock %}

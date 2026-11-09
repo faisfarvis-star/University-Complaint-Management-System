@@ -1,0 +1,12 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+{% macro status_badge(s) %}<span class="badge text-bg-{{ s|status_class }}">{{ s }}</span>{% endmacro %}
+{% macro priority_badge(p) %}<span class="badge text-bg-{{ p|priority_class }}">{{ p }}</span>{% endmacro %}
+{% macro stat(label, value, icon, tone='primary') %}
+<div class="card-n stat h-100"><div class="icon text-{{ tone }}"><i class="bi bi-{{ icon }}" aria-hidden="true"></i></div>
+<div><div class="value">{{ value }}</div><div class="label">{{ label }}</div></div></div>
+{% endmacro %}
+{% macro field(f, type=None) %}
+<div class="mb-3"><label class="form-label" for="{{ f.id }}">{{ f.label.text }}</label>
+{{ f(class="form-select" if f.type in ('SelectField',) else "form-control" + (" is-invalid" if f.errors else ""), **kwargs) }}
+{% for e in f.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}</div>
+{% endmacro %}

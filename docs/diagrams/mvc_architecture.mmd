@@ -1,0 +1,19 @@
+flowchart LR
+    U[Browser] -->|HTTP request| C
+    subgraph Controller["CONTROLLER  app/controllers/*"]
+        C[auth / main / student / admin / staff blueprints]
+    end
+    subgraph Service["Application services (business rules)  app/services/*"]
+        S[ComplaintService / AuthService / StatsService]
+    end
+    subgraph Repo["Repository layer  app/repositories/*"]
+        R[Interfaces + SQLAlchemy implementations]
+    end
+    subgraph Model["MODEL  app/models/*"]
+        M[User, Complaint, Category, History, Comment, Notification, Attachment, AuditLog]
+    end
+    DB[(SQLite)]
+    V["VIEW  app/templates + app/static + app/views"]
+    C --> S --> R --> M --> DB
+    C -->|render_template| V -->|HTML| U
+    C -. forms .-> F[app/forms]

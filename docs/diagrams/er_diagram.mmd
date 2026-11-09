@@ -1,0 +1,17 @@
+erDiagram
+    USERS ||--o{ COMPLAINTS : "submits (student_id)"
+    USERS ||--o{ COMPLAINTS : "handles (assigned_staff_id)"
+    CATEGORIES ||--o{ COMPLAINTS : classifies
+    COMPLAINTS ||--o{ COMPLAINT_HISTORY : has
+    COMPLAINTS ||--o{ COMPLAINT_COMMENTS : has
+    COMPLAINTS ||--o{ ATTACHMENTS : has
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ AUDIT_LOGS : performs
+    USERS { int id PK string full_name string email UK string registration_number UK string password_hash string role string department datetime created_at bool is_active }
+    COMPLAINTS { int id PK string complaint_number UK int student_id FK int assigned_staff_id FK int category_id FK string title text description string priority string status text resolution_notes datetime created_at datetime updated_at datetime resolved_at }
+    CATEGORIES { int id PK string name UK string description }
+    COMPLAINT_HISTORY { int id PK int complaint_id FK int changed_by FK string old_status string new_status string remarks datetime created_at }
+    COMPLAINT_COMMENTS { int id PK int complaint_id FK int user_id FK text message datetime created_at }
+    NOTIFICATIONS { int id PK int user_id FK int complaint_id FK string title string message bool is_read datetime created_at }
+    ATTACHMENTS { int id PK int complaint_id FK string original_filename string stored_filename UK datetime uploaded_at }
+    AUDIT_LOGS { int id PK int actor_id FK string action string entity_type int entity_id datetime created_at }

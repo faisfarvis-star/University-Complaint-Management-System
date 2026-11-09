@@ -1,0 +1,36 @@
+classDiagram
+    class ComplaintRepository {
+        <<interface>>
+        +create(complaint)
+        +get_by_id(id)
+        +list_by_student(student_id)
+        +list_by_staff(staff_id)
+        +search(filters, student_id, staff_id)
+        +update(complaint)
+        +count_by_status()
+        +monthly_trend(months)
+    }
+    class UserRepository { <<interface>> +create() +get_by_id() +get_by_email() +list_by_role() +update() }
+    class CategoryRepository { <<interface>> +create() +get_by_id() +list_all() +update() +delete() }
+    class NotificationRepository { <<interface>> +create() +list_for_user() +unread_count() +mark_read() }
+    class ComplaintHistoryRepository { <<interface>> +create() +list_by_complaint() }
+    class SqlAlchemyComplaintRepository
+    class SqlAlchemyUserRepository
+    class SqlAlchemyCategoryRepository
+    class SqlAlchemyNotificationRepository
+    class SqlAlchemyComplaintHistoryRepository
+    class InMemoryComplaintRepository { <<test double>> }
+    class ComplaintService {
+        +submit() +assign() +change_status() +add_comment()
+    }
+    ComplaintRepository <|.. SqlAlchemyComplaintRepository
+    ComplaintRepository <|.. InMemoryComplaintRepository
+    UserRepository <|.. SqlAlchemyUserRepository
+    CategoryRepository <|.. SqlAlchemyCategoryRepository
+    NotificationRepository <|.. SqlAlchemyNotificationRepository
+    ComplaintHistoryRepository <|.. SqlAlchemyComplaintHistoryRepository
+    ComplaintService --> ComplaintRepository
+    ComplaintService --> UserRepository
+    ComplaintService --> CategoryRepository
+    ComplaintService --> NotificationRepository
+    ComplaintService --> ComplaintHistoryRepository

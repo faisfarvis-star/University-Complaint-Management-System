@@ -1,0 +1,34 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import stat %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+ <div class="col-6 col-xl">{{ stat('Total complaints', stats.total, 'collection') }}</div>
+ <div class="col-6 col-xl">{{ stat('Pending', stats.pending, 'hourglass-split', 'warning') }}</div>
+ <div class="col-6 col-xl">{{ stat('In progress', stats.in_progress, 'gear', 'info') }}</div>
+ <div class="col-6 col-xl">{{ stat('Resolved', stats.resolved, 'check-circle', 'success') }}</div>
+ <div class="col-6 col-xl">{{ stat('Closed', stats.closed, 'archive', 'secondary') }}</div>
+</div>
+<p class="small text-muted">“In progress” counts assigned, in-progress and reopened complaints. <a href="{{ url_for('admin.complaints', overdue=1) }}">{{ stats.overdue }} overdue</a> (open longer than {{ overdue_days }} days).</p>
+<div class="row g-3 mb-3">
+ <div class="col-lg-4"><div class="card-n"><h2>Priority distribution</h2><div class="chart-box"><canvas id="priorityChart" aria-label="Priority distribution chart" role="img"></canvas></div></div></div>
+ <div class="col-lg-4"><div class="card-n"><h2>Complaints by category</h2><div class="chart-box"><canvas id="categoryChart" aria-label="Category chart" role="img"></canvas></div></div></div>
+ <div class="col-lg-4"><div class="card-n"><h2>Monthly trend</h2><div class="chart-box"><canvas id="trendChart" aria-label="Monthly trend chart" role="img"></canvas></div></div></div>
+</div>
+<div class="row g-3">
+ <div class="col-xl-7"><div class="card-n"><h2>Recent complaints</h2>{% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div></div>
+ <div class="col-xl-5"><div class="card-n"><h2>Staff performance</h2><div class="table-responsive"><table class="table">
+  <thead><tr><th>Staff</th><th>Assigned</th><th>Resolved</th><th>Rate</th><th>Avg hrs</th></tr></thead><tbody>
+  {% for p in stats.staff_performance %}<tr><td>{{ p.name }}</td><td>{{ p.assigned }}</td><td>{{ p.resolved }}</td><td>{{ p.rate }}%</td><td>{{ p.avg_hours if p.avg_hours is not none else '—' }}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-muted text-center">No staff yet.</td></tr>{% endfor %}</tbody></table></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+const pri = {{ stats.priority|tojson }}, cat = {{ stats.category|tojson }}, trend = {{ stats.trend|tojson }};
+const colors = ['#3b5bdb','#15aabf','#fab005','#fa5252','#40c057','#7950f2','#868e96'];
+new Chart(document.getElementById('priorityChart'), {type:'doughnut', data:{labels:Object.keys(pri), datasets:[{data:Object.values(pri), backgroundColor:['#adb5bd','#15aabf','#fab005','#fa5252']}]}, options:{maintainAspectRatio:false}});
+new Chart(document.getElementById('categoryChart'), {type:'bar', data:{labels:Object.keys(cat), datasets:[{label:'Complaints', data:Object.values(cat), backgroundColor:colors}]}, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
+new Chart(document.getElementById('trendChart'), {type:'line', data:{labels:trend.map(t=>t.label), datasets:[{label:'Complaints', data:trend.map(t=>t.count), borderColor:'#3b5bdb', backgroundColor:'rgba(59,91,219,.15)', fill:true, tension:.35}]}, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
+</script>
+{% endblock %}

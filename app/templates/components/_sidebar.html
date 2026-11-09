@@ -1,0 +1,31 @@
+{% macro link(endpoint, icon, label, match=None) %}
+<a class="side-link {{ 'active' if request.endpoint == endpoint or (match and request.endpoint in match) }}" href="{{ url_for(endpoint, **kwargs) }}"><i class="bi bi-{{ icon }}" aria-hidden="true"></i>{{ label }}{{ caller() if caller }}</a>
+{% endmacro %}
+<nav class="sidebar" aria-label="Main navigation">
+  <a class="brand" href="{{ url_for('main.dashboard') }}"><i class="bi bi-megaphone" aria-hidden="true"></i><span>UCMS<br><small class="text-muted fw-normal">Complaint Management</small></span></a>
+  <div class="nav-label">Menu</div>
+  {{ link(current_user.role ~ '.dashboard', 'grid-1x2', 'Dashboard') }}
+  {% if current_user.role == 'student' %}
+    {{ link('student.my_complaints', 'folder2-open', 'My Complaints') }}
+    {{ link('student.submit', 'plus-circle', 'Submit Complaint') }}
+  {% elif current_user.role == 'admin' %}
+    {{ link('admin.complaints', 'inboxes', 'All Complaints') }}
+    {{ link('admin.assignments', 'diagram-3', 'Assignments') }}
+    <div class="nav-label">Manage</div>
+    {{ link('admin.students', 'mortarboard', 'Students') }}
+    {{ link('admin.staff', 'people', 'Staff') }}
+    {{ link('admin.manage_categories', 'tags', 'Categories') }}
+    {{ link('admin.audit', 'journal-text', 'Audit Logs') }}
+  {% else %}
+    {{ link('staff.assigned', 'list-task', 'My Complaints') }}
+    {{ link('staff.completed', 'check2-circle', 'Completed') }}
+  {% endif %}
+  <div class="nav-label">Account</div>
+  <a class="side-link {{ 'active' if request.endpoint == 'main.notifications' }}" href="{{ url_for('main.notifications') }}"><i class="bi bi-bell" aria-hidden="true"></i>Notifications{% if unread_count %}<span class="badge text-bg-danger">{{ unread_count }}</span>{% endif %}</a>
+  {{ link('main.profile', 'person-circle', 'Profile') }}
+  {{ link('main.settings', 'gear', 'Settings') }}
+  <form method="post" action="{{ url_for('auth.logout') }}" class="mt-auto pt-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="side-link text-danger" type="submit"><i class="bi bi-box-arrow-left" aria-hidden="true"></i>Logout</button>
+  </form>
+</nav>

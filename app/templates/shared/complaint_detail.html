@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge, csrf, field %}
+{% block title %}{{ complaint.complaint_number }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+<div class="col-lg-8">
+ <div class="card-n mb-3">
+  <div class="d-flex flex-wrap justify-content-between gap-2"><h2 class="mb-1">{{ complaint.title }}</h2><div>{{ status_badge(complaint.status) }} {{ priority_badge(complaint.priority) }}</div></div>
+  <p class="text-muted small">{{ complaint.category.name }} · submitted {{ complaint.created_at|dt }} by {{ complaint.student.full_name }} ({{ complaint.student.registration_number or 'n/a' }})</p>
+  <p style="white-space:pre-wrap">{{ complaint.description }}</p>
+  {% if complaint.resolution_notes %}<div class="alert alert-success"><strong>Resolution note:</strong> {{ complaint.resolution_notes }}</div>{% endif %}
+  {% if complaint.attachments %}<h3 class="h6">Attachments</h3><ul>{% for a in complaint.attachments %}<li><a href="{{ url_for('main.download_attachment', attachment_id=a.id) }}">{{ a.original_filename }}</a></li>{% endfor %}</ul>{% endif %}
+  {% if can_edit %}<a class="btn btn-soft" href="{{ url_for('student.edit', complaint_id=complaint.id) }}"><i class="bi bi-pencil"></i> Edit</a>{% endif %}
+ </div>
+ <div class="card-n mb-3"><h2>Conversation</h2>
+  {% for m in complaint.comments %}<div class="comment mb-2"><div class="small text-muted"><strong>{{ m.user.full_name }}</strong> ({{ m.user.role }}) · {{ m.created_at|dt }}</div><div style="white-space:pre-wrap">{{ m.message }}</div></div>
+  {% else %}<p class="text-muted">No comments yet.</p>{% endfor %}
+  <form method="post" action="{{ url_for('main.add_comment', complaint_id=complaint.id) }}" class="mt-3">{{ comment_form.hidden_tag() }}
+   {{ field(comment_form.message, rows=3) }}<button class="btn btn-primary" type="submit">{{ 'Send update to student' if current_user.role == 'admin' else 'Post comment' }}</button></form>
+ </div>
+</div>
+<div class="col-lg-4">
+ <div class="card-n mb-3"><h2>Details</h2><dl class="mb-0 small">
+  <dt>Complaint no.</dt><dd>{{ complaint.complaint_number }}</dd>
+  <dt>Assigned staff</dt><dd>{{ complaint.assigned_staff.full_name if complaint.assigned_staff else 'Not assigned yet' }}</dd>
+  <dt>Last updated</dt><dd>{{ complaint.updated_at|dt }}</dd><dt>Resolved</dt><dd>{{ complaint.resolved_at|dt }}</dd></dl></div>
+ {% if current_user.role == 'admin' and complaint.status in ['Pending','Assigned','Reopened'] %}
+ <div class="card-n mb-3"><h2>{{ 'Reassign' if complaint.status == 'Assigned' else 'Assign' }} complaint</h2>
+  <form method="post" action="{{ url_for('main.assign', complaint_id=complaint.id) }}">{{ assign_form.hidden_tag() }}{{ field(assign_form.staff_id) }}{{ field(assign_form.remarks) }}<button class="btn btn-primary w-100" type="submit">Assign</button></form></div>
+ {% endif %}
+ {% if allowed %}
+ <div class="card-n mb-3"><h2>Update status</h2>
+  <form method="post" action="{{ url_for('main.change_status', complaint_id=complaint.id) }}">{{ status_form.hidden_tag() }}
+   {{ field(status_form.new_status) }}{{ field(status_form.remarks, rows=3) }}
+   <p class="small text-muted">A note is required when resolving or reopening.</p><button class="btn btn-primary w-100" type="submit">Update</button></form></div>
+ {% endif %}
+ <div class="card-n"><h2>Status history</h2><ul class="timeline">
+  {% for h in complaint.history %}<li><div>{{ status_badge(h.new_status) }}{% if h.old_status %} <span class="small text-muted">from {{ h.old_status }}</span>{% endif %}</div>
+  <div class="small">{{ h.remarks or '' }}</div><div class="small text-muted">{{ h.user.full_name }} · {{ h.created_at|dt }}</div></li>{% endfor %}</ul></div>
+</div></div>
+{% endblock %}

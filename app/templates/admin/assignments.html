@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge, csrf %}
+{% block title %}Complaint Assignments{% endblock %}
+{% block content %}
+<div class="card-n"><div class="table-responsive"><table class="table">
+<thead><tr><th>No.</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned to</th><th style="min-width:260px">Assign</th></tr></thead><tbody>
+{% for c in complaints %}<tr><td><a href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td><td>{{ c.title }}</td>
+<td>{{ priority_badge(c.priority) }}</td><td>{{ status_badge(c.status) }}</td><td>{{ c.assigned_staff.full_name if c.assigned_staff else '—' }}</td>
+<td>{% if c.status in ['Pending','Assigned','Reopened'] %}<form method="post" action="{{ url_for('main.assign', complaint_id=c.id) }}" class="d-flex gap-2">{{ csrf() }}
+<input type="hidden" name="next_url" value="{{ url_for('admin.assignments') }}">
+<select class="form-select" name="staff_id" aria-label="Staff for {{ c.complaint_number }}">{% for s in staff %}<option value="{{ s.id }}" {{ 'selected' if s.id == c.assigned_staff_id }}>{{ s.full_name }}</option>{% endfor %}</select>
+<button class="btn btn-primary" type="submit">Go</button></form>{% else %}<span class="text-muted small">Work in progress</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="text-center text-muted py-4">No open complaints.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

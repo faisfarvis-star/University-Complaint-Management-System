@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from 'components/_macros.html' import field %}
+{% block title %}{{ 'Edit Complaint' if editing else 'Submit Complaint' }}{% endblock %}
+{% block content %}
+<div class="card-n" style="max-width:760px"><form method="post" enctype="multipart/form-data" novalidate>{{ form.hidden_tag() }}
+ <div class="row"><div class="col-md-6">{{ field(form.category_id) }}</div><div class="col-md-6">{{ field(form.priority) }}</div></div>
+ {{ field(form.title) }}{{ field(form.description, rows=6) }}
+ {% if not editing %}{{ field(form.attachments) }}{% endif %}
+ <button class="btn btn-primary" type="submit">{{ 'Save changes' if editing else 'Submit complaint' }}</button>
+ <a class="btn btn-soft ms-2" href="{{ url_for('student.my_complaints') }}">Cancel</a>
+</form></div>
+{% endblock %}

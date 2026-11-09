@@ -1,0 +1,7 @@
+{% from 'components/_macros.html' import status_badge, priority_badge %}
+<div class="table-responsive"><table class="table">
+<thead><tr><th>No.</th><th>Title</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead><tbody>
+{% for c in items %}<tr><td><a href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
+<td>{{ c.title }}</td><td>{{ priority_badge(c.priority) }}</td><td>{{ status_badge(c.status) }}</td><td>{{ c.created_at|dt('%d %b %Y') }}</td></tr>
+{% else %}<tr><td colspan="5" class="text-center text-muted py-4">Nothing to show yet.</td></tr>{% endfor %}
+</tbody></table></div>
