@@ -1,8 +1,9 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import field %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import field, avatar %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-<div class="card-n" style="max-width:560px"><form method="post" novalidate>{{ form.hidden_tag() }}
-<div class="mb-3"><label class="form-label">Email</label><input class="form-control" value="{{ current_user.email }}" disabled></div>
-{% if current_user.registration_number %}<div class="mb-3"><label class="form-label">Registration number</label><input class="form-control" value="{{ current_user.registration_number }}" disabled></div>{% endif %}
+<div class="card-n" style="max-width:600px"><div class="d-flex align-items-center gap-3 mb-4">{{ avatar(current_user.full_name) }}<div><strong>{{ current_user.full_name }}</strong><div class="small text-muted text-capitalize">{{ current_user.role }}</div></div></div>
+<form method="post" novalidate>{{ form.hidden_tag() }}
+<div class="mb-3"><label class="form-label" for="profile-email">Email</label><input class="form-control" id="profile-email" value="{{ current_user.email }}" disabled></div>
+{% if current_user.registration_number %}<div class="mb-3"><label class="form-label" for="profile-reg">Registration number</label><input class="form-control" id="profile-reg" value="{{ current_user.registration_number }}" disabled></div>{% endif %}
 {{ field(form.full_name) }}{{ field(form.department) }}<button class="btn btn-primary" type="submit">Save profile</button></form></div>
 {% endblock %}

@@ -1,11 +1,13 @@
-{% extends 'auth/base_auth.html' %}{% from 'components/_macros.html' import field %}
+{% extends 'auth/base_auth.html' %}{% from 'components/_macros.html' import field, password_field %}
 {% block title %}Student registration{% endblock %}
+{% block card_class %}wide{% endblock %}
 {% block content %}
-<div class="card-n"><h2>Student registration</h2>
+<h2 class="auth-title">Create your student account</h2>
 <form method="post" novalidate>{{ form.hidden_tag() }}
-  {{ field(form.full_name) }}{{ field(form.email) }}{{ field(form.registration_number) }}{{ field(form.department) }}
-  {{ field(form.password) }}{{ field(form.confirm) }}
-  <button class="btn btn-primary w-100" type="submit">Create account</button>
+  <div class="row"><div class="col-sm-6">{{ field(form.full_name, autocomplete="name") }}</div><div class="col-sm-6">{{ field(form.registration_number) }}</div></div>
+  {{ field(form.email, autocomplete="email") }}{{ field(form.department) }}
+  <div class="row"><div class="col-sm-6">{{ password_field(form.password, autocomplete="new-password") }}</div><div class="col-sm-6">{{ password_field(form.confirm, autocomplete="new-password") }}</div></div>
+  <button class="btn btn-primary" type="submit">Create account</button>
 </form>
-<p class="text-center mt-3 mb-0 small">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></p></div>
+<p class="text-center mt-3 mb-0 small">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
 {% endblock %}

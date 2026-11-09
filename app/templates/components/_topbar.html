@@ -1,0 +1,28 @@
+{% from 'components/_macros.html' import avatar %}
+{% macro topbar(title) %}
+<header class="topbar">
+  <button class="icon-btn" type="button" data-sidebar-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation"><i data-lucide="panel-left" class="icon" aria-hidden="true"></i></button>
+  <div class="topbar-titles">
+    <h1 class="page-title">{{ title }}</h1>
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb"><ol>
+      <li><a href="{{ url_for('main.dashboard') }}">CampusFlow</a></li>
+      {% if (request.endpoint or '').endswith('.dashboard') %}<li aria-current="page">{{ current_user.role|capitalize }} workspace</li>
+      {% else %}<li><a href="{{ url_for(current_user.role ~ '.dashboard') }}">Dashboard</a></li><li aria-current="page">{{ title }}</li>{% endif %}
+    </ol></nav>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to dark mode"><i data-lucide="moon" class="icon moon" aria-hidden="true"></i><i data-lucide="sun" class="icon sun" aria-hidden="true"></i></button>
+    <a href="{{ url_for('main.notifications') }}" class="icon-btn" aria-label="Notifications{% if unread_count %}, {{ unread_count }} unread{% endif %}"><i data-lucide="bell" class="icon" aria-hidden="true"></i>{% if unread_count %}<span class="dot-badge" aria-hidden="true">{{ unread_count if unread_count < 100 else '99+' }}</span>{% endif %}</a>
+    <div class="menu" data-menu>
+      <button class="avatar-btn" type="button" data-menu-btn aria-haspopup="true" aria-expanded="false" aria-label="Account menu for {{ current_user.full_name }}">{{ avatar(current_user.full_name) }}</button>
+      <div class="menu-panel" role="menu">
+        <div class="menu-head"><strong>{{ current_user.full_name }}</strong><span>{{ current_user.email }}</span></div>
+        <a class="menu-item" role="menuitem" href="{{ url_for('main.profile') }}"><i data-lucide="user-round" class="icon" aria-hidden="true"></i>Profile</a>
+        <a class="menu-item" role="menuitem" href="{{ url_for('main.settings') }}"><i data-lucide="settings" class="icon" aria-hidden="true"></i>Settings</a>
+        <form method="post" action="{{ url_for('auth.logout') }}" data-no-loading><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="menu-item danger" role="menuitem" type="submit"><i data-lucide="log-out" class="icon" aria-hidden="true"></i>Log out</button></form>
+      </div>
+    </div>
+  </div>
+</header>
+{% endmacro %}

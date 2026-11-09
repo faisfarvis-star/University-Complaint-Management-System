@@ -1,12 +1,13 @@
-{% extends 'auth/base_auth.html' %}{% from 'components/_macros.html' import csrf, field %}
+{% extends 'auth/base_auth.html' %}{% from 'components/_macros.html' import field, password_field %}
 {% block title %}Sign in{% endblock %}
 {% block content %}
-<div class="card-n"><h2>Sign in</h2>
+<h2 class="auth-title">Sign in to your account</h2>
 <form method="post" novalidate>{{ form.hidden_tag() }}
-  {{ field(form.email, autocomplete="username", autofocus=true) }}
-  {{ field(form.password, autocomplete="current-password") }}
+  {{ field(form.email, autocomplete="username", autofocus=true, placeholder="you@university.edu") }}
+  {{ password_field(form.password, autocomplete="current-password", placeholder="Your password") }}
   <div class="form-check mb-3">{{ form.remember(class="form-check-input") }}<label class="form-check-label" for="remember">{{ form.remember.label.text }}</label></div>
-  <button class="btn btn-primary w-100" type="submit">Sign in</button>
+  <button class="btn btn-primary" type="submit">Sign in</button>
 </form>
-<p class="text-center mt-3 mb-0 small">New student? <a href="{{ url_for('auth.register') }}">Create an account</a></p></div>
+<p class="text-center mt-3 mb-0 small">New student? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+<p class="text-center mt-2 mb-0 small text-muted">Staff and administrator accounts are created by the university.</p>
 {% endblock %}

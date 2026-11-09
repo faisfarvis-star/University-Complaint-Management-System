@@ -1,7 +1,7 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import field %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import field, password_field %}
 {% block title %}Add Staff Member{% endblock %}
 {% block content %}
-<div class="card-n" style="max-width:560px"><form method="post" novalidate>{{ form.hidden_tag() }}
-{{ field(form.full_name) }}{{ field(form.email) }}{{ field(form.department) }}{{ field(form.password, autocomplete="new-password") }}
-<button class="btn btn-primary" type="submit">Create account</button> <a class="btn btn-soft ms-2" href="{{ url_for('admin.staff') }}">Cancel</a></form></div>
+<div class="card-n" style="max-width:600px"><form method="post" novalidate>{{ form.hidden_tag() }}
+{{ field(form.full_name) }}{{ field(form.email) }}{{ field(form.department) }}{{ password_field(form.password, autocomplete="new-password") }}
+<div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Create account</button><a class="btn btn-soft" href="{{ url_for('admin.staff') }}">Cancel</a></div></form></div>
 {% endblock %}

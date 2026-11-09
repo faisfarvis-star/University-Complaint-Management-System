@@ -1,7 +1,10 @@
-{% from 'components/_macros.html' import status_badge, priority_badge %}
-<div class="table-responsive"><table class="table">
-<thead><tr><th>No.</th><th>Title</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead><tbody>
-{% for c in items %}<tr><td><a href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
-<td>{{ c.title }}</td><td>{{ priority_badge(c.priority) }}</td><td>{{ status_badge(c.status) }}</td><td>{{ c.created_at|dt('%d %b %Y') }}</td></tr>
-{% else %}<tr><td colspan="5" class="text-center text-muted py-4">Nothing to show yet.</td></tr>{% endfor %}
-</tbody></table></div>
+{# Compact complaint table used by student/staff dashboards. Expects `items`; optional `show_student`. #}
+{% from 'components/_macros.html' import status_badge, priority_badge, empty_state %}
+{% if items %}
+<div class="table-responsive"><table class="table table-stack">
+<thead><tr><th scope="col">No.</th><th scope="col">Title</th><th scope="col">Priority</th><th scope="col">Status</th><th scope="col">Created</th></tr></thead><tbody>
+{% for c in items %}<tr>
+<td data-label="No."><a class="cell-link" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
+<td data-label="Title" class="cell-title">{{ c.title }}</td><td data-label="Priority">{{ priority_badge(c.priority) }}</td><td data-label="Status">{{ status_badge(c.status) }}</td><td data-label="Created">{{ c.created_at|dt('%d %b %Y') }}</td></tr>
+{% endfor %}</tbody></table></div>
+{% else %}{{ empty_state('inbox', 'Nothing to show yet', 'Complaints will appear here as soon as there is activity.') }}{% endif %}

@@ -1,3 +1,7 @@
-{% with messages = get_flashed_messages(with_categories=true) %}{% for cat, msg in messages %}
-<div class="alert alert-{{ cat if cat in ['success','danger','warning','info'] else 'info' }} alert-dismissible fade show" role="alert">{{ msg }}
-<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>{% endfor %}{% endwith %}
+{# Flash messages rendered as toasts. role=alert for errors so screen readers announce them immediately. #}
+{% set toast_icons = {'success':'circle-check','danger':'circle-alert','warning':'triangle-alert','info':'info'} %}
+<div class="toast-region" aria-live="polite">
+{% with messages = get_flashed_messages(with_categories=true) %}{% for cat, msg in messages %}{% set c = cat if cat in ['success','danger','warning','info'] else 'info' %}
+<div class="toast-n {{ c }}" role="{{ 'alert' if c == 'danger' else 'status' }}"><i data-lucide="{{ toast_icons[c] }}" class="icon" aria-hidden="true"></i>
+<div class="t-msg">{{ msg }}</div><button type="button" aria-label="Dismiss notification"><i data-lucide="x" class="icon" aria-hidden="true"></i></button></div>{% endfor %}{% endwith %}
+</div>

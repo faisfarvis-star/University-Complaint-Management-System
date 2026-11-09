@@ -1,12 +1,63 @@
+{# CampusFlow reusable components. Import with: {% from 'components/_macros.html' import stat, status_badge %} #}
 {% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
-{% macro status_badge(s) %}<span class="badge text-bg-{{ s|status_class }}">{{ s }}</span>{% endmacro %}
-{% macro priority_badge(p) %}<span class="badge text-bg-{{ p|priority_class }}">{{ p }}</span>{% endmacro %}
-{% macro stat(label, value, icon, tone='primary') %}
-<div class="card-n stat h-100"><div class="icon text-{{ tone }}"><i class="bi bi-{{ icon }}" aria-hidden="true"></i></div>
-<div><div class="value">{{ value }}</div><div class="label">{{ label }}</div></div></div>
+
+{% macro icon(name, cls='') %}<i data-lucide="{{ name }}" class="icon {{ cls }}" aria-hidden="true"></i>{% endmacro %}
+
+{% macro avatar(name) %}{% set parts = (name or '?').split() %}<span class="avatar" aria-hidden="true">{{ ((parts[0][:1] ~ (parts[1][:1] if parts|length > 1 else '')) | upper) }}</span>{% endmacro %}
+
+{# Status text is always rendered, so colour is never the only signal. #}
+{% macro status_badge(s) %}<span class="pill status-{{ s|lower|replace(' ', '-') }}">{{ s }}</span>{% endmacro %}
+{% macro priority_badge(p) %}<span class="pill no-dot pri-{{ p|lower }}">{{ p }}</span>{% endmacro %}
+{% macro active_badge(is_active) %}<span class="pill {{ 'pill-active' if is_active else 'pill-inactive' }}">{{ 'Active' if is_active else 'Deactivated' }}</span>{% endmacro %}
+
+{% macro stat(label, value, icon, tone='primary', href=None) %}
+{% if href %}<a class="card-n stat tone-{{ tone }} h-100" href="{{ href }}">{% else %}<div class="card-n stat tone-{{ tone }} h-100">{% endif %}
+<span class="icon-wrap"><i data-lucide="{{ icon }}" class="icon" aria-hidden="true"></i></span>
+<div><div class="value">{{ value }}</div><div class="label">{{ label }}</div></div>
+{% if href %}</a>{% else %}</div>{% endif %}
 {% endmacro %}
+
+{% macro empty_state(icon_name, title, text='', href=None, action='') %}
+<div class="empty-state"><span class="empty-icon"><i data-lucide="{{ icon_name }}" class="icon" aria-hidden="true"></i></span>
+<strong>{{ title }}</strong>{% if text %}<p>{{ text }}</p>{% endif %}
+{% if href %}<a class="btn btn-primary btn-sm mt-2" href="{{ href }}">{{ action }}</a>{% endif %}</div>
+{% endmacro %}
+
+{# Buttons. variant: primary | soft #}
+{% macro button(label, href, icon_name=None, variant='primary', extra='') %}
+<a class="btn btn-{{ variant }} {{ extra }}" href="{{ href }}">{% if icon_name %}<i data-lucide="{{ icon_name }}" class="icon" aria-hidden="true"></i>{% endif %}{{ label }}</a>
+{% endmacro %}
+
+{# Submit button that asks for confirmation in an accessible dialog (see app.js). Use inside a <form>. #}
+{% macro confirm_button(label, message, confirm_label='Confirm', cls='btn btn-soft btn-sm') %}
+<button type="submit" class="{{ cls }}" data-confirm="{{ message }}" data-confirm-label="{{ confirm_label }}">{{ label }}</button>
+{% endmacro %}
+
+{# Marks a table wrapper for client-side paging (rows need data-row). #}
+{% macro pagination_note(size=10) %}data-paginate="{{ size }}"{% endmacro %}
+
+{% macro notification_card(n) %}
+<form method="post" action="{{ url_for('main.open_notification', notification_id=n.id) }}" class="mb-2">{{ csrf() }}
+<button class="card-n notice {{ 'unread' if not n.is_read }}" type="submit">
+  <span class="n-icon"><i data-lucide="{{ 'bell-ring' if not n.is_read else 'bell' }}" class="icon" aria-hidden="true"></i></span>
+  <span class="n-body"><strong>{% if not n.is_read %}<span class="visually-hidden-focusable">Unread: </span>{% endif %}{{ n.title }}</strong><span class="text-muted">{{ n.message }}</span></span>
+  <span class="n-time">{{ n.created_at|dt }}</span>
+</button></form>
+{% endmacro %}
+
 {% macro field(f, type=None) %}
+{% set extra = {'aria-invalid': 'true', 'aria-describedby': f.id ~ '-error'} if f.errors else {} %}
+{% set _ = extra.update(kwargs) %}
+<div class="mb-3"><label class="form-label" for="{{ f.id }}">{{ f.label.text }}{% if f.flags.required %}<span class="text-danger" aria-hidden="true"> *</span>{% endif %}</label>
+{{ f(class=("form-select" if f.type in ('SelectField',) else "form-control") ~ (" is-invalid" if f.errors else ""), **extra) }}
+{% for e in f.errors %}<div class="field-error" id="{{ f.id }}-error" role="alert"><i data-lucide="circle-alert" class="icon" aria-hidden="true"></i>{{ e }}</div>{% endfor %}</div>
+{% endmacro %}
+
+{% macro password_field(f) %}
+{% set extra = {'aria-invalid': 'true', 'aria-describedby': f.id ~ '-error'} if f.errors else {} %}
+{% set _ = extra.update(kwargs) %}
 <div class="mb-3"><label class="form-label" for="{{ f.id }}">{{ f.label.text }}</label>
-{{ f(class="form-select" if f.type in ('SelectField',) else "form-control" + (" is-invalid" if f.errors else ""), **kwargs) }}
-{% for e in f.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}</div>
+<div class="input-group-toggle">{{ f(class="form-control" ~ (" is-invalid" if f.errors else ""), **extra) }}
+<button type="button" class="pw-toggle" data-pw-toggle="{{ f.id }}" aria-label="Show password" aria-pressed="false"><i data-lucide="eye" class="icon" aria-hidden="true"></i></button></div>
+{% for e in f.errors %}<div class="field-error" id="{{ f.id }}-error" role="alert"><i data-lucide="circle-alert" class="icon" aria-hidden="true"></i>{{ e }}</div>{% endfor %}</div>
 {% endmacro %}

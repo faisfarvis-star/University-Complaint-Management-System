@@ -1,7 +1,7 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import field %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import password_field %}
 {% block title %}Settings{% endblock %}
 {% block content %}
-<div class="card-n" style="max-width:560px"><h2>Change password</h2><form method="post" novalidate>{{ form.hidden_tag() }}
-{{ field(form.current, autocomplete="current-password") }}{{ field(form.new, autocomplete="new-password") }}{{ field(form.confirm, autocomplete="new-password") }}
+<div class="card-n" style="max-width:600px"><div class="card-head"><h2>Change password</h2></div><form method="post" novalidate>{{ form.hidden_tag() }}
+{{ password_field(form.current, autocomplete="current-password") }}{{ password_field(form.new, autocomplete="new-password") }}{{ password_field(form.confirm, autocomplete="new-password") }}
 <button class="btn btn-primary" type="submit">Update password</button></form></div>
 {% endblock %}

@@ -1,34 +1,69 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import stat %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import stat, icon, status_badge, priority_badge, empty_state, button %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<div class="row g-3 mb-4">
- <div class="col-6 col-xl">{{ stat('Total complaints', stats.total, 'collection') }}</div>
- <div class="col-6 col-xl">{{ stat('Pending', stats.pending, 'hourglass-split', 'warning') }}</div>
- <div class="col-6 col-xl">{{ stat('In progress', stats.in_progress, 'gear', 'info') }}</div>
- <div class="col-6 col-xl">{{ stat('Resolved', stats.resolved, 'check-circle', 'success') }}</div>
- <div class="col-6 col-xl">{{ stat('Closed', stats.closed, 'archive', 'secondary') }}</div>
+<div class="page-head"><div><h2>University Complaint Overview</h2><p>Monitor, manage and resolve campus complaints efficiently.</p></div>
+  {{ button('View complaints', url_for('admin.complaints'), 'inbox') }}</div>
+
+<div class="row g-3 mb-4 reveal">
+ <div class="col-6 col-lg-4 col-xl">{{ stat('Total complaints', stats.total, 'layers', 'primary', url_for('admin.complaints')) }}</div>
+ <div class="col-6 col-lg-4 col-xl">{{ stat('Pending', stats.pending, 'clock', 'warning', url_for('admin.complaints', status='Pending')) }}</div>
+ <div class="col-6 col-lg-4 col-xl">{{ stat('In progress', stats.in_progress, 'loader', 'info') }}</div>
+ <div class="col-6 col-lg-6 col-xl">{{ stat('Resolved', stats.resolved, 'circle-check', 'success', url_for('admin.complaints', status='Resolved')) }}</div>
+ <div class="col-12 col-lg-6 col-xl">{{ stat('Overdue', stats.overdue, 'triangle-alert', 'danger', url_for('admin.complaints', overdue=1)) }}</div>
 </div>
-<p class="small text-muted">“In progress” counts assigned, in-progress and reopened complaints. <a href="{{ url_for('admin.complaints', overdue=1) }}">{{ stats.overdue }} overdue</a> (open longer than {{ overdue_days }} days).</p>
+<p class="small text-muted mb-4">“In progress” counts assigned, in-progress and reopened complaints. Overdue means open for longer than {{ overdue_days }} days; closed complaints ({{ stats.closed }}) are shown in the status chart.</p>
+
 <div class="row g-3 mb-3">
- <div class="col-lg-4"><div class="card-n"><h2>Priority distribution</h2><div class="chart-box"><canvas id="priorityChart" aria-label="Priority distribution chart" role="img"></canvas></div></div></div>
- <div class="col-lg-4"><div class="card-n"><h2>Complaints by category</h2><div class="chart-box"><canvas id="categoryChart" aria-label="Category chart" role="img"></canvas></div></div></div>
- <div class="col-lg-4"><div class="card-n"><h2>Monthly trend</h2><div class="chart-box"><canvas id="trendChart" aria-label="Monthly trend chart" role="img"></canvas></div></div></div>
+ <div class="col-lg-8"><div class="card-n h-100"><div class="card-head"><h2>Monthly complaint trends</h2><span class="small text-muted">Last 6 months</span></div>
+  <div class="chart-box"><canvas id="trendChart" role="img" aria-label="Line chart of complaints submitted per month"></canvas><div class="chart-empty">{{ empty_state('chart-line', 'No trend data yet', 'Monthly totals appear once complaints are submitted.') }}</div></div></div></div>
+ <div class="col-lg-4"><div class="card-n h-100"><div class="card-head"><h2>Status distribution</h2></div>
+  <div class="chart-box"><canvas id="statusChart" role="img" aria-label="Doughnut chart of complaints by status"></canvas><div class="chart-empty">{{ empty_state('chart-pie', 'No complaints yet', 'Status breakdown will show here.') }}</div></div></div></div>
 </div>
+<div class="row g-3 mb-4">
+ <div class="col-lg-6"><div class="card-n h-100"><div class="card-head"><h2>Complaints by category</h2></div>
+  <div class="chart-box"><canvas id="categoryChart" role="img" aria-label="Bar chart of complaints by category"></canvas><div class="chart-empty">{{ empty_state('tags', 'No category data yet', 'Complaints per category will show here.') }}</div></div></div></div>
+ <div class="col-lg-6"><div class="card-n h-100"><div class="card-head"><h2>Priority distribution</h2></div>
+  <div class="chart-box"><canvas id="priorityChart" role="img" aria-label="Doughnut chart of complaints by priority"></canvas><div class="chart-empty">{{ empty_state('flag', 'No priority data yet', 'Priority breakdown will show here.') }}</div></div></div></div>
+</div>
+
+<div class="card-n mb-4">
+ <div class="card-head"><h2>Recent complaints</h2><a class="btn btn-soft btn-sm" href="{{ url_for('admin.complaints') }}">View all</a></div>
+ <form class="row g-2 mb-3" method="get" action="{{ url_for('admin.complaints') }}" role="search" aria-label="Search complaints">
+  <div class="col-12 col-md-5"><label class="visually-hidden-focusable" for="dash-q">Search complaints</label><div class="search-box">{{ icon('search') }}<input class="form-control" id="dash-q" name="q" type="search" placeholder="Search by number, title or text"></div></div>
+  <div class="col-6 col-md-3"><label class="visually-hidden-focusable" for="dash-status">Status</label><select class="form-select" id="dash-status" name="status"><option value="">All statuses</option>{% for s in STATUSES %}<option>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-6 col-md-2"><label class="visually-hidden-focusable" for="dash-pri">Priority</label><select class="form-select" id="dash-pri" name="priority"><option value="">All priorities</option>{% for p in PRIORITIES %}<option>{{ p }}</option>{% endfor %}</select></div>
+  <div class="col-12 col-md-2"><button class="btn btn-primary w-100" type="submit">{{ icon('filter') }}Filter</button></div>
+ </form>
+ {% if stats.recent %}
+ <div class="table-responsive"><table class="table table-hover table-stack">
+  <thead><tr><th scope="col">Complaint ID</th><th scope="col">Student</th><th scope="col">Category</th><th scope="col">Priority</th><th scope="col">Status</th><th scope="col">Date</th><th scope="col">Actions</th></tr></thead><tbody>
+  {% for c in stats.recent %}<tr>
+   <td data-label="Complaint ID"><a class="cell-link" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
+   <td data-label="Student">{{ c.student.full_name }}</td><td data-label="Category">{{ c.category.name }}</td>
+   <td data-label="Priority">{{ priority_badge(c.priority) }}</td><td data-label="Status">{{ status_badge(c.status) }}</td>
+   <td data-label="Date">{{ c.created_at|dt('%d %b %Y') }}</td>
+   <td data-label="Actions"><a class="btn btn-soft btn-sm" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}" aria-label="View {{ c.complaint_number }}">{{ icon('eye') }}View</a></td></tr>{% endfor %}
+  </tbody></table></div>
+ {% else %}{{ empty_state('inbox', 'No complaints yet', 'New complaints from students will appear here.') }}{% endif %}
+</div>
+
 <div class="row g-3">
- <div class="col-xl-7"><div class="card-n"><h2>Recent complaints</h2>{% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div></div>
- <div class="col-xl-5"><div class="card-n"><h2>Staff performance</h2><div class="table-responsive"><table class="table">
-  <thead><tr><th>Staff</th><th>Assigned</th><th>Resolved</th><th>Rate</th><th>Avg hrs</th></tr></thead><tbody>
-  {% for p in stats.staff_performance %}<tr><td>{{ p.name }}</td><td>{{ p.assigned }}</td><td>{{ p.resolved }}</td><td>{{ p.rate }}%</td><td>{{ p.avg_hours if p.avg_hours is not none else '—' }}</td></tr>
-  {% else %}<tr><td colspan="5" class="text-muted text-center">No staff yet.</td></tr>{% endfor %}</tbody></table></div></div></div>
+ <div class="col-xl-7"><div class="card-n h-100"><div class="card-head"><h2>Staff performance</h2></div>
+  {% if stats.staff_performance %}<div class="table-responsive"><table class="table table-stack">
+  <thead><tr><th scope="col">Staff</th><th scope="col">Assigned</th><th scope="col">Resolved</th><th scope="col">Rate</th><th scope="col">Avg hrs</th></tr></thead><tbody>
+  {% for p in stats.staff_performance %}<tr><td data-label="Staff">{{ p.name }}</td><td data-label="Assigned">{{ p.assigned }}</td><td data-label="Resolved">{{ p.resolved }}</td><td data-label="Rate">{{ p.rate }}%</td><td data-label="Avg hrs">{{ p.avg_hours if p.avg_hours is not none else '—' }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty_state('users', 'No staff yet', 'Add a staff member to start assigning complaints.', url_for('admin.new_staff'), 'Add staff member') }}{% endif %}</div></div>
+ <div class="col-xl-5"><div class="card-n h-100"><div class="card-head"><h2>Quick actions</h2></div>
+  <div class="quick-actions">
+   <a class="quick-action" href="{{ url_for('admin.complaints') }}"><span class="qa-icon">{{ icon('inbox') }}</span>View complaints</a>
+   <a class="quick-action" href="{{ url_for('admin.staff') }}"><span class="qa-icon">{{ icon('users') }}</span>Manage staff</a>
+   <a class="quick-action" href="{{ url_for('admin.manage_categories') }}"><span class="qa-icon">{{ icon('tags') }}</span>Manage categories</a>
+   <a class="quick-action" href="{{ url_for('admin.export_csv') }}"><span class="qa-icon">{{ icon('download') }}</span>Generate reports (CSV)</a>
+  </div></div></div>
 </div>
+<script type="application/json" id="chart-data">{{ {'trend': stats.trend, 'category': stats.category, 'priority': stats.priority, 'status': {'pending': stats.pending, 'in_progress': stats.in_progress, 'resolved': stats.resolved, 'closed': stats.closed}}|tojson }}</script>
 {% endblock %}
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<script>
-const pri = {{ stats.priority|tojson }}, cat = {{ stats.category|tojson }}, trend = {{ stats.trend|tojson }};
-const colors = ['#3b5bdb','#15aabf','#fab005','#fa5252','#40c057','#7950f2','#868e96'];
-new Chart(document.getElementById('priorityChart'), {type:'doughnut', data:{labels:Object.keys(pri), datasets:[{data:Object.values(pri), backgroundColor:['#adb5bd','#15aabf','#fab005','#fa5252']}]}, options:{maintainAspectRatio:false}});
-new Chart(document.getElementById('categoryChart'), {type:'bar', data:{labels:Object.keys(cat), datasets:[{label:'Complaints', data:Object.values(cat), backgroundColor:colors}]}, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
-new Chart(document.getElementById('trendChart'), {type:'line', data:{labels:trend.map(t=>t.label), datasets:[{label:'Complaints', data:trend.map(t=>t.count), borderColor:'#3b5bdb', backgroundColor:'rgba(59,91,219,.15)', fill:true, tension:.35}]}, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}}}});
-</script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script defer src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}

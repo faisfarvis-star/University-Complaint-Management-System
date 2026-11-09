@@ -1,7 +1,7 @@
 {% extends 'base.html' if current_user.is_authenticated else 'auth/base_auth.html' %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="card-n text-center py-5"><div class="display-4 fw-bold text-primary">{{ code }}</div>
-<h2 class="mt-2">{{ title }}</h2><p class="text-muted">{{ text }}</p>
-<a class="btn btn-primary" href="{{ url_for('main.index') }}">Back to home</a></div>
+<div class="empty-state" style="padding:1rem 0"><div class="display-4 fw-bold" style="color:var(--primary-strong)">{{ code }}</div>
+<strong class="fs-5">{{ title }}</strong><p>{{ text }}</p>
+<a class="btn btn-primary mt-2" href="{{ url_for('main.index') }}">Back to home</a></div>
 {% endblock %}
