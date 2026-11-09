@@ -1,12 +1,11 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import csrf, icon, active_badge, confirm_button, empty_state, button %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import csrf %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="page-head"><div><h2>{{ title }}</h2><p>{{ people|length }} account{{ '' if people|length == 1 else 's' }}.</p></div>
- {% if role == 'staff' %}{{ button('Add staff member', url_for('admin.new_staff'), 'user-plus') }}{% endif %}</div>
-<div class="card-n">{% if people %}<div class="table-responsive" data-paginate="15"><table class="table table-stack">
-<thead><tr><th scope="col">Name</th><th scope="col">Email</th>{% if role == 'student' %}<th scope="col">Reg. no.</th>{% endif %}<th scope="col">Department</th><th scope="col">Joined</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden-focusable">Actions</span></th></tr></thead><tbody>
-{% for p in people %}<tr data-row><td data-label="Name">{{ p.full_name }}</td><td data-label="Email">{{ p.email }}</td>{% if role == 'student' %}<td data-label="Reg. no.">{{ p.registration_number }}</td>{% endif %}<td data-label="Department">{{ p.department or '—' }}</td><td data-label="Joined">{{ p.created_at|dt('%d %b %Y') }}</td>
-<td data-label="Status">{{ active_badge(p.is_active) }}</td>
-<td data-label="Actions"><form method="post" action="{{ url_for('admin.toggle_user', user_id=p.id) }}">{{ csrf() }}{{ confirm_button('Deactivate' if p.is_active else 'Activate', ('Deactivate' if p.is_active else 'Activate') ~ ' ' ~ p.full_name ~ '?', 'Deactivate' if p.is_active else 'Activate') }}</form></td></tr>{% endfor %}</tbody></table></div>
-{% else %}{{ empty_state('users', 'No accounts yet', 'Accounts will be listed here once created.') }}{% endif %}</div>
+{% if role == 'staff' %}<div class="mb-3"><a class="btn btn-primary" href="{{ url_for('admin.new_staff') }}"><i class="bi bi-person-plus"></i> Add staff member</a></div>{% endif %}
+<div class="card-n"><div class="table-responsive"><table class="table">
+<thead><tr><th>Name</th><th>Email</th>{% if role == 'student' %}<th>Reg. no.</th>{% endif %}<th>Department</th><th>Joined</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in people %}<tr><td>{{ p.full_name }}</td><td>{{ p.email }}</td>{% if role == 'student' %}<td>{{ p.registration_number }}</td>{% endif %}<td>{{ p.department or '—' }}</td><td>{{ p.created_at|dt('%d %b %Y') }}</td>
+<td><span class="badge text-bg-{{ 'success' if p.is_active else 'secondary' }}">{{ 'Active' if p.is_active else 'Deactivated' }}</span></td>
+<td><form method="post" action="{{ url_for('admin.toggle_user', user_id=p.id) }}">{{ csrf() }}<button class="btn btn-soft btn-sm" data-confirm="{{ 'Deactivate' if p.is_active else 'Activate' }} {{ p.full_name }}?">{{ 'Deactivate' if p.is_active else 'Activate' }}</button></form></td></tr>
+{% else %}<tr><td colspan="7" class="text-center text-muted py-4">No accounts yet.</td></tr>{% endfor %}</tbody></table></div></div>
 {% endblock %}

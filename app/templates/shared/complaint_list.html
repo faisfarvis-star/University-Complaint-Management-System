@@ -1,36 +1,31 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge, icon, empty_state, button %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="page-head"><div><h2>{{ title }}</h2><p>{{ complaints|length }} complaint{{ '' if complaints|length == 1 else 's' }} match the current filters.</p></div>
-  {% if scope == 'student' %}{{ button('Submit Complaint', url_for('student.submit'), 'plus') }}{% endif %}</div>
-<form class="card-n filter-bar" method="get" role="search" aria-label="Filter complaints"><div class="row g-2 align-items-end">
- <div class="col-12 col-md-4"><label class="form-label" for="q">Search</label><div class="search-box">{{ icon('search') }}<input class="form-control" id="q" name="q" type="search" value="{{ request.args.get('q','') }}" placeholder="Number, title or text"></div></div>
+<form class="card-n mb-3" method="get"><div class="row g-2 align-items-end">
+ <div class="col-12 col-md-4"><label class="form-label" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ request.args.get('q','') }}" placeholder="Number, title or text"></div>
  <div class="col-6 col-md-2"><label class="form-label" for="status">Status</label><select class="form-select" id="status" name="status"><option value="">All</option>{% for s in STATUSES %}<option {{ 'selected' if request.args.get('status')==s }}>{{ s }}</option>{% endfor %}</select></div>
  <div class="col-6 col-md-2"><label class="form-label" for="priority">Priority</label><select class="form-select" id="priority" name="priority"><option value="">All</option>{% for p in PRIORITIES %}<option {{ 'selected' if request.args.get('priority')==p }}>{{ p }}</option>{% endfor %}</select></div>
  <div class="col-12 col-md-4"><label class="form-label" for="category_id">Category</label><select class="form-select" id="category_id" name="category_id"><option value="">All</option>{% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if request.args.get('category_id')==c.id|string }}>{{ c.name }}</option>{% endfor %}</select></div>
  <div class="col-6 col-md-3"><label class="form-label" for="date_from">From</label><input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from','') }}"></div>
  <div class="col-6 col-md-3"><label class="form-label" for="date_to">To</label><input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to','') }}"></div>
- <div class="col-12 col-md-6 d-flex gap-2 flex-wrap"><button class="btn btn-primary" type="submit">{{ icon('search') }}Filter</button>
+ <div class="col-12 col-md-6 d-flex gap-2 flex-wrap"><button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filter</button>
   <a class="btn btn-soft" href="{{ request.path }}">Reset</a>
   {% if scope == 'admin' %}
    <a class="btn btn-soft" href="{{ request.path }}?status=Pending">Pending</a>
    <a class="btn btn-soft" href="{{ request.path }}?status=Resolved">Resolved</a>
    <a class="btn btn-soft" href="{{ request.path }}?overdue=1">Overdue</a>
-   <a class="btn btn-soft" href="{{ url_for('admin.export_csv', **request.args) }}">{{ icon('download') }}CSV</a>
+   <a class="btn btn-soft" href="{{ url_for('admin.export_csv', **request.args) }}"><i class="bi bi-download"></i> CSV</a>
   {% endif %}</div>
 </div></form>
-<div class="card-n">
-{% if complaints %}
-<div class="table-responsive" data-paginate="15"><table class="table table-hover table-stack">
-<thead><tr><th scope="col">No.</th><th scope="col">Title</th>{% if scope != 'student' %}<th scope="col">Student</th>{% endif %}<th scope="col">Category</th><th scope="col">Priority</th><th scope="col">Status</th>{% if scope == 'admin' %}<th scope="col">Staff</th>{% endif %}<th scope="col">Created</th></tr></thead><tbody>
-{% for c in complaints %}<tr data-row class="{{ 'row-urgent' if c.priority == 'Urgent' and c.status not in ['Resolved','Closed'] }}">
-<td data-label="No."><a class="cell-link" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
-<td data-label="Title" class="cell-title">{{ c.title }}{% if c.is_overdue(overdue_days) %} <span class="pill pill-overdue no-dot">Overdue</span>{% endif %}</td>
-{% if scope != 'student' %}<td data-label="Student">{{ c.student.full_name }}</td>{% endif %}
-<td data-label="Category">{{ c.category.name }}</td><td data-label="Priority">{{ priority_badge(c.priority) }}</td><td data-label="Status">{{ status_badge(c.status) }}</td>
-{% if scope == 'admin' %}<td data-label="Staff">{{ c.assigned_staff.full_name if c.assigned_staff else '—' }}</td>{% endif %}
-<td data-label="Created">{{ c.created_at|dt('%d %b %Y') }}</td></tr>{% endfor %}
-</tbody></table></div>
-{% else %}{{ empty_state('search-x', 'No complaints match your filters', 'Try a different search or reset the filters.', request.path, 'Reset filters') }}{% endif %}
-</div>
+<div class="card-n"><div class="table-responsive"><table class="table table-hover">
+<thead><tr><th>No.</th><th>Title</th>{% if scope != 'student' %}<th>Student</th>{% endif %}<th>Category</th><th>Priority</th><th>Status</th>{% if scope == 'admin' %}<th>Staff</th>{% endif %}<th>Created</th></tr></thead><tbody>
+{% for c in complaints %}<tr>
+<td><a href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td>
+<td>{{ c.title }}{% if c.is_overdue(overdue_days) %} <span class="badge text-bg-danger">Overdue</span>{% endif %}</td>
+{% if scope != 'student' %}<td>{{ c.student.full_name }}</td>{% endif %}
+<td>{{ c.category.name }}</td><td>{{ priority_badge(c.priority) }}</td><td>{{ status_badge(c.status) }}</td>
+{% if scope == 'admin' %}<td>{{ c.assigned_staff.full_name if c.assigned_staff else '—' }}</td>{% endif %}
+<td>{{ c.created_at|dt('%d %b %Y') }}</td></tr>
+{% else %}<tr><td colspan="8" class="text-center text-muted py-4">No complaints match your filters.</td></tr>{% endfor %}
+</tbody></table></div><p class="small text-muted mt-2 mb-0">{{ complaints|length }} complaint(s)</p></div>
 {% endblock %}

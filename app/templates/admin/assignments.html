@@ -1,14 +1,13 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge, csrf, empty_state %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import status_badge, priority_badge, csrf %}
 {% block title %}Complaint Assignments{% endblock %}
 {% block content %}
-<div class="page-head"><div><h2>Complaint assignments</h2><p>Assign open complaints to staff members.</p></div></div>
-<div class="card-n">{% if complaints %}<div class="table-responsive" data-paginate="15"><table class="table table-stack">
-<thead><tr><th scope="col">No.</th><th scope="col">Title</th><th scope="col">Priority</th><th scope="col">Status</th><th scope="col">Assigned to</th><th scope="col" style="min-width:260px">Assign</th></tr></thead><tbody>
-{% for c in complaints %}<tr data-row><td data-label="No."><a class="cell-link" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td><td data-label="Title" class="cell-title">{{ c.title }}</td>
-<td data-label="Priority">{{ priority_badge(c.priority) }}</td><td data-label="Status">{{ status_badge(c.status) }}</td><td data-label="Assigned to">{{ c.assigned_staff.full_name if c.assigned_staff else '—' }}</td>
-<td data-label="Assign">{% if c.status in ['Pending','Assigned','Reopened'] %}<form method="post" action="{{ url_for('main.assign', complaint_id=c.id) }}" class="d-flex gap-2 w-100">{{ csrf() }}
+<div class="card-n"><div class="table-responsive"><table class="table">
+<thead><tr><th>No.</th><th>Title</th><th>Priority</th><th>Status</th><th>Assigned to</th><th style="min-width:260px">Assign</th></tr></thead><tbody>
+{% for c in complaints %}<tr><td><a href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a></td><td>{{ c.title }}</td>
+<td>{{ priority_badge(c.priority) }}</td><td>{{ status_badge(c.status) }}</td><td>{{ c.assigned_staff.full_name if c.assigned_staff else '—' }}</td>
+<td>{% if c.status in ['Pending','Assigned','Reopened'] %}<form method="post" action="{{ url_for('main.assign', complaint_id=c.id) }}" class="d-flex gap-2">{{ csrf() }}
 <input type="hidden" name="next_url" value="{{ url_for('admin.assignments') }}">
 <select class="form-select" name="staff_id" aria-label="Staff for {{ c.complaint_number }}">{% for s in staff %}<option value="{{ s.id }}" {{ 'selected' if s.id == c.assigned_staff_id }}>{{ s.full_name }}</option>{% endfor %}</select>
-<button class="btn btn-primary" type="submit">Go</button></form>{% else %}<span class="text-muted small">Work in progress</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
-{% else %}{{ empty_state('circle-check', 'No open complaints', 'Everything has been handled.') }}{% endif %}</div>
+<button class="btn btn-primary" type="submit">Go</button></form>{% else %}<span class="text-muted small">Work in progress</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="text-center text-muted py-4">No open complaints.</td></tr>{% endfor %}</tbody></table></div></div>
 {% endblock %}

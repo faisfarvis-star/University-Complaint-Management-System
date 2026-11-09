@@ -1,8 +1,8 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import csrf, icon, notification_card, empty_state %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import csrf %}
 {% block title %}Notifications{% endblock %}
 {% block content %}
-<div class="page-head"><div><h2>Notifications</h2><p>{% if unread_count %}{{ unread_count }} unread{% else %}You are all caught up.{% endif %}</p></div>
- {% if unread_count %}<form method="post" action="{{ url_for('main.read_all_notifications') }}" data-no-loading>{{ csrf() }}<button class="btn btn-soft" type="submit">{{ icon('check-check') }}Mark all as read</button></form>{% endif %}</div>
-{% for n in items %}{{ notification_card(n) }}
-{% else %}<div class="card-n">{{ empty_state('bell-off', 'You have no notifications', 'Updates about your complaints will appear here.') }}</div>{% endfor %}
+<div class="d-flex justify-content-end mb-3"><form method="post" action="{{ url_for('main.read_all_notifications') }}">{{ csrf() }}<button class="btn btn-soft" type="submit"><i class="bi bi-check2-all"></i> Mark all as read</button></form></div>
+{% for n in items %}<form method="post" action="{{ url_for('main.open_notification', notification_id=n.id) }}" class="mb-2">{{ csrf() }}
+<button class="card-n w-100 text-start border-0 {{ 'note-unread' if not n.is_read }}" type="submit"><div class="d-flex justify-content-between"><strong>{{ n.title }}</strong><span class="small text-muted">{{ n.created_at|dt }}</span></div><div class="text-muted">{{ n.message }}</div></button></form>
+{% else %}<div class="card-n text-center text-muted py-5">You have no notifications.</div>{% endfor %}
 {% endblock %}

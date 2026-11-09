@@ -1,42 +1,13 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import stat, icon, button, empty_state, status_badge %}
+{% extends 'base.html' %}{% from 'components/_macros.html' import stat %}
 {% block title %}Student Dashboard{% endblock %}
 {% block content %}
-<div class="page-head"><div><h2>Welcome back, {{ current_user.full_name.split()[0] }}</h2><p>Track and manage your university complaints in one place.</p></div>
-  {{ button('Submit Complaint', url_for('student.submit'), 'plus') }}</div>
-
-<div class="row g-3 mb-4 reveal">
- <div class="col-6 col-xl-3">{{ stat('Total complaints', stats.total, 'layers', 'primary', url_for('student.my_complaints')) }}</div>
- <div class="col-6 col-xl-3">{{ stat('Pending', stats.pending, 'clock', 'warning', url_for('student.my_complaints', status='Pending')) }}</div>
- <div class="col-6 col-xl-3">{{ stat('In progress', stats.in_progress, 'loader', 'info') }}</div>
- <div class="col-6 col-xl-3">{{ stat('Resolved', stats.resolved + stats.closed, 'circle-check', 'success') }}</div>
+<div class="d-flex justify-content-between align-items-center mb-3"><p class="mb-0 text-muted">Welcome back, {{ current_user.full_name.split()[0] }}.</p>
+<a class="btn btn-primary" href="{{ url_for('student.submit') }}"><i class="bi bi-plus-lg"></i> Submit complaint</a></div>
+<div class="row g-3 mb-4">
+ <div class="col-6 col-xl-3">{{ stat('Total submitted', stats.total, 'collection') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Pending', stats.pending, 'hourglass-split', 'warning') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('In progress', stats.in_progress, 'gear', 'info') }}</div>
+ <div class="col-6 col-xl-3">{{ stat('Resolved / closed', stats.resolved + stats.closed, 'check-circle', 'success') }}</div>
 </div>
-
-<div class="row g-3 mb-3">
- <div class="col-xl-8"><div class="card-n h-100"><div class="card-head"><h2>Recent complaints</h2><a class="btn btn-soft btn-sm" href="{{ url_for('student.my_complaints') }}">View all</a></div>
-  {% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div></div>
- <div class="col-xl-4"><div class="card-n h-100"><div class="card-head"><h2>Complaint status overview</h2></div>
-  {% if stats.total %}
-  {% set done = stats.resolved + stats.closed %}
-  <div class="stack-bar" role="img" aria-label="{{ stats.pending }} pending, {{ stats.in_progress }} in progress, {{ done }} resolved or closed">
-   <span class="seg-pending" style="width:{{ stats.pending / stats.total * 100 }}%"></span><span class="seg-progress" style="width:{{ stats.in_progress / stats.total * 100 }}%"></span><span class="seg-resolved" style="width:{{ done / stats.total * 100 }}%"></span></div>
-  <ul class="legend"><li><i class="seg-pending"></i>Pending<b>{{ stats.pending }}</b></li><li><i class="seg-progress"></i>In progress<b>{{ stats.in_progress }}</b></li><li><i class="seg-resolved"></i>Resolved or closed<b>{{ done }}</b></li></ul>
-  {% else %}{{ empty_state('chart-pie', 'No complaints yet', 'Your status overview will appear after you submit a complaint.') }}{% endif %}</div></div>
-</div>
-
-<div class="row g-3">
- <div class="col-lg-5"><div class="card-n h-100"><div class="card-head"><h2>Activity timeline</h2></div>
-  {% if stats.recent %}<ul class="timeline">{% for c in stats.recent %}
-   <li><a class="cell-link fw-bold text-decoration-none" href="{{ url_for('main.complaint_detail', complaint_id=c.id) }}">{{ c.complaint_number }}</a> {{ status_badge(c.status) }}
-   <div class="small">{{ c.title }}</div><div class="small text-muted">Submitted {{ c.created_at|dt }}{% if c.updated_at and c.updated_at != c.created_at %} · updated {{ c.updated_at|dt }}{% endif %}</div></li>{% endfor %}</ul>
-  {% else %}{{ empty_state('history', 'No activity yet', 'Updates to your complaints will show up here.') }}{% endif %}</div></div>
- <div class="col-lg-4"><div class="card-n h-100"><div class="card-head"><h2>Quick actions</h2></div>
-  <div class="quick-actions" style="grid-template-columns:1fr">
-   <a class="quick-action" href="{{ url_for('student.submit') }}"><span class="qa-icon">{{ icon('circle-plus') }}</span>Submit a complaint</a>
-   <a class="quick-action" href="{{ url_for('student.my_complaints') }}"><span class="qa-icon">{{ icon('folder-open') }}</span>View my complaints</a>
-   <a class="quick-action" href="{{ url_for('main.profile') }}"><span class="qa-icon">{{ icon('user-round') }}</span>Update my profile</a></div></div></div>
- <div class="col-lg-3"><div class="card-n h-100"><div class="card-head"><h2>Notifications</h2></div>
-  {% if unread_count %}<p class="mb-3"><span class="unread-dot" aria-hidden="true"></span>You have <strong>{{ unread_count }}</strong> unread notification{{ '' if unread_count == 1 else 's' }}.</p>
-   <a class="btn btn-primary btn-sm" href="{{ url_for('main.notifications') }}">{{ icon('bell') }}Open notifications</a>
-  {% else %}{{ empty_state('bell', 'All caught up', 'No unread notifications.', url_for('main.notifications'), 'View notifications') }}{% endif %}</div></div>
-</div>
+<div class="card-n"><h2>Recent complaint activity</h2>{% with items=stats.recent %}{% include 'shared/_recent_table.html' %}{% endwith %}</div>
 {% endblock %}

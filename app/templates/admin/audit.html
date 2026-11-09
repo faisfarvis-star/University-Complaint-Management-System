@@ -1,7 +1,7 @@
-{% extends 'base.html' %}{% from 'components/_macros.html' import empty_state %}
+{% extends 'base.html' %}
 {% block title %}Audit Logs{% endblock %}
 {% block content %}
-<div class="card-n">{% if logs %}<div class="table-responsive" data-paginate="20"><table class="table table-stack"><thead><tr><th scope="col">When</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Entity</th></tr></thead><tbody>
-{% for l in logs %}<tr data-row><td data-label="When">{{ l.created_at|dt }}</td><td data-label="Actor">{{ l.actor.full_name if l.actor else 'system' }}</td><td data-label="Action">{{ l.action }}</td><td data-label="Entity">{{ l.entity_type }}{% if l.entity_id %} #{{ l.entity_id }}{% endif %}</td></tr>{% endfor %}</tbody></table></div>
-{% else %}{{ empty_state('scroll-text', 'No audit entries yet', 'Administrative actions will be recorded here.') }}{% endif %}</div>
+<div class="card-n"><div class="table-responsive"><table class="table"><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Entity</th></tr></thead><tbody>
+{% for l in logs %}<tr><td>{{ l.created_at|dt }}</td><td>{{ l.actor.full_name if l.actor else 'system' }}</td><td>{{ l.action }}</td><td>{{ l.entity_type }}{% if l.entity_id %} #{{ l.entity_id }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="text-center text-muted py-4">No audit entries yet.</td></tr>{% endfor %}</tbody></table></div></div>
 {% endblock %}

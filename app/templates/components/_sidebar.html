@@ -1,34 +1,31 @@
-{% from 'components/_macros.html' import avatar %}
 {% macro link(endpoint, icon, label, match=None) %}
-{% set active = request.endpoint == endpoint or (match and request.endpoint in match) %}
-<a class="side-link {{ 'active' if active }}" href="{{ url_for(endpoint, **kwargs) }}" title="{{ label }}"{% if active %} aria-current="page"{% endif %}><i data-lucide="{{ icon }}" class="icon" aria-hidden="true"></i><span class="label-text">{{ label }}</span>{{ caller() if caller }}</a>
+<a class="side-link {{ 'active' if request.endpoint == endpoint or (match and request.endpoint in match) }}" href="{{ url_for(endpoint, **kwargs) }}"><i class="bi bi-{{ icon }}" aria-hidden="true"></i>{{ label }}{{ caller() if caller }}</a>
 {% endmacro %}
-<nav class="sidebar" id="sidebar" aria-label="Main navigation">
-  <a class="brand" href="{{ url_for('main.dashboard') }}" title="CampusFlow home"><span class="brand-mark"><i data-lucide="graduation-cap" class="icon" aria-hidden="true"></i></span><span class="brand-text">CampusFlow<small>Complaint management</small></span></a>
+<nav class="sidebar" aria-label="Main navigation">
+  <a class="brand" href="{{ url_for('main.dashboard') }}"><i class="bi bi-megaphone" aria-hidden="true"></i><span>UCMS<br><small class="text-muted fw-normal">Complaint Management</small></span></a>
   <div class="nav-label">Menu</div>
-  {{ link(current_user.role ~ '.dashboard', 'layout-dashboard', 'Dashboard') }}
+  {{ link(current_user.role ~ '.dashboard', 'grid-1x2', 'Dashboard') }}
   {% if current_user.role == 'student' %}
-    {{ link('student.my_complaints', 'folder-open', 'My Complaints') }}
-    {{ link('student.submit', 'circle-plus', 'Submit Complaint') }}
+    {{ link('student.my_complaints', 'folder2-open', 'My Complaints') }}
+    {{ link('student.submit', 'plus-circle', 'Submit Complaint') }}
   {% elif current_user.role == 'admin' %}
-    {{ link('admin.complaints', 'inbox', 'All Complaints') }}
-    {{ link('admin.assignments', 'git-branch', 'Assignments') }}
+    {{ link('admin.complaints', 'inboxes', 'All Complaints') }}
+    {{ link('admin.assignments', 'diagram-3', 'Assignments') }}
     <div class="nav-label">Manage</div>
-    {{ link('admin.students', 'graduation-cap', 'Students') }}
-    {{ link('admin.staff', 'users', 'Staff') }}
+    {{ link('admin.students', 'mortarboard', 'Students') }}
+    {{ link('admin.staff', 'people', 'Staff') }}
     {{ link('admin.manage_categories', 'tags', 'Categories') }}
-    {{ link('admin.audit', 'scroll-text', 'Audit Logs') }}
+    {{ link('admin.audit', 'journal-text', 'Audit Logs') }}
   {% else %}
-    {{ link('staff.assigned', 'list-todo', 'My Complaints') }}
-    {{ link('staff.completed', 'circle-check', 'Completed') }}
+    {{ link('staff.assigned', 'list-task', 'My Complaints') }}
+    {{ link('staff.completed', 'check2-circle', 'Completed') }}
   {% endif %}
   <div class="nav-label">Account</div>
-  {% call link('main.notifications', 'bell', 'Notifications') %}{% if unread_count %}<span class="badge-count" aria-label="{{ unread_count }} unread">{{ unread_count }}</span>{% endif %}{% endcall %}
-  {{ link('main.profile', 'user-round', 'Profile') }}
-  {{ link('main.settings', 'settings', 'Settings') }}
-  <div class="side-user">{{ avatar(current_user.full_name) }}<div class="who"><strong>{{ current_user.full_name }}</strong><span>{{ current_user.role }}</span></div></div>
-  <form method="post" action="{{ url_for('auth.logout') }}" class="logout-form" data-no-loading>
+  <a class="side-link {{ 'active' if request.endpoint == 'main.notifications' }}" href="{{ url_for('main.notifications') }}"><i class="bi bi-bell" aria-hidden="true"></i>Notifications{% if unread_count %}<span class="badge text-bg-danger">{{ unread_count }}</span>{% endif %}</a>
+  {{ link('main.profile', 'person-circle', 'Profile') }}
+  {{ link('main.settings', 'gear', 'Settings') }}
+  <form method="post" action="{{ url_for('auth.logout') }}" class="mt-auto pt-3">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="side-link danger" type="submit" title="Log out"><i data-lucide="log-out" class="icon" aria-hidden="true"></i><span class="label-text">Logout</span></button>
+    <button class="side-link text-danger" type="submit"><i class="bi bi-box-arrow-left" aria-hidden="true"></i>Logout</button>
   </form>
 </nav>
